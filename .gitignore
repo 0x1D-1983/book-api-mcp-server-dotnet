@@ -1,0 +1,117 @@
+## Ignore build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+TestResults/
+.nuget/
+*.user
+*.suo
+*.builds
+*.pidb
+*.svclog
+*.sln.docstates
+*.pyc
+
+## OS generated files
+[Tt]humbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+ehthumbs.db
+Icon?
+.DS_Store
+.AppleDouble
+.LSOverride
+
+## Rider/JetBrains
+.idea/
+*.sln.iml
+
+## Visual Studio Code
+.vscode/
+
+# Visual Studio for Mac
+.vscode/
+.vscode-test/
+
+## ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## DotCover
+*.dotCover
+
+## DotNet
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Core Environment Variable
+.env
+.env.*
+
+# Others
+*.ncrunch*
+*.ndoc
+*.publish.xml
+*.cache
+*.orig
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+*.DotSettings
+# Rider-specific
+.idea/
+
+## .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.dbmdl
+*.dbproj.schemaview
+
+# Test, build and publish results
+TestResults/
+out/
+publish/
+/publish
+/_publish
+/PublishScripts/
+*.publishsettings
+
+# NUGET Packages
+*.nupkg
+*.snupkg
+.nuget/
+# The packages folder can be ignored because of Package Restore
+**/[Pp]ackages/*
+# except build/, which is used as an MSBuild target.
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+# Entity Framework
+*.aps
+*.edmx.sql
+*.edmx.diagram
+*.edmx
+*.tt
+*.t4
+
+# Service Fabric Local Cluster
+_sfroot_/
+# Docker
+**/*.dockerfile
+
