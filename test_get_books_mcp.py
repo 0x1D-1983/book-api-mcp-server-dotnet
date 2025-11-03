@@ -33,7 +33,7 @@ print("Connecting to MCP server...", file=sys.stderr)
 
 # Start the MCP server process
 process = subprocess.Popen(
-    ["dotnet", "run", "--project", "BookApiMcpServer.csproj", "--no-build"],
+    ["dotnet", "bin/Release/net9.0/BookApiMcpServer.dll"],
     stdin=subprocess.PIPE,
     stdout=subprocess.PIPE,
     stderr=subprocess.DEVNULL,
@@ -75,10 +75,15 @@ try:
     # Step 4: Read the response
     response = read_json_response(process)
     
+    if response:
+        print(f"Response: {response}", file=sys.stderr)
+    
     if response and "result" in response:
         result = response["result"]
+        print(f"Result: {result}", file=sys.stderr)
         if "content" in result:
             content_text = result["content"][0]["text"]
+            print(f"Content text: {content_text}", file=sys.stderr)
             books_list = json.loads(content_text)
             
             print(f"\n{'='*60}")
