@@ -46,6 +46,12 @@ public class BookService
         var response = await httpClient.PutAsJsonAsync($"{config.BaseUrl}/books/{book.Id}", book);
         if (response.IsSuccessStatusCode)
         {
+            // UpdateBook returns 204 NoContent, so fetch the updated book
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+            {
+                return await GetBookById(book.Id);
+            }
+            // If it returns 200 with content, deserialize it
             return await response.Content.ReadFromJsonAsync<Book>();
         }
         return null;
@@ -56,6 +62,13 @@ public class BookService
         var response = await httpClient.DeleteAsync($"{config.BaseUrl}/books/{id}");
         if (response.IsSuccessStatusCode)
         {
+            // DeleteBook returns 204 NoContent, so we can't deserialize content
+            // Return null to indicate successful deletion (no book to return)
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+            {
+                return null; // Successfully deleted, but no book to return
+            }
+            // If it returns 200 with content, deserialize it
             return await response.Content.ReadFromJsonAsync<Book>();
         }
         return null;

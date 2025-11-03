@@ -34,7 +34,11 @@ public static class BookTools
     public static async Task<string> UpdateBook(BookService bookService, Book book)
     {
         var updatedBook = await bookService.UpdateBook(book);
-        return updatedBook != null ? JsonSerializer.Serialize(updatedBook) : "";
+        if (updatedBook == null)
+        {
+            throw new InvalidOperationException($"Failed to update book with id {book.Id}. The update may have succeeded, but the updated book could not be retrieved.");
+        }
+        return JsonSerializer.Serialize(updatedBook);
     }
 
     [McpServerTool, Description("Delete a book")]
