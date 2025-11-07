@@ -8,8 +8,11 @@ using BookApiMcpServer.Models;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-// Disable console logging to keep stdout clean for MCP JSON-RPC messages
-builder.Logging.ClearProviders();
+builder.Logging.AddConsole(options =>
+{
+    // Configure all logs to go to stderr
+    options.LogToStandardErrorThreshold = LogLevel.Trace;
+});
 
 builder.Services
         .AddMcpServer()
