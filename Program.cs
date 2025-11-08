@@ -1,12 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
+﻿using ModelContextProtocol.Server;
 using System.ComponentModel;
 using BookApiMcpServer.Services;
 using BookApiMcpServer.Models;
 
-var builder = Host.CreateApplicationBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
+
+var serverUrl = "http://localhost:5288/";
 
 builder.Logging.AddConsole(options =>
 {
@@ -14,9 +13,10 @@ builder.Logging.AddConsole(options =>
     options.LogToStandardErrorThreshold = LogLevel.Trace;
 });
 
+builder.Services.AddHttpContextAccessor();
 builder.Services
         .AddMcpServer()
-        .WithStdioServerTransport()
+        .WithHttpTransport()
         .WithToolsFromAssembly();
 
 // Configure BookApiConfig using IOptionsMonitor
@@ -26,4 +26,8 @@ builder.Services.Configure<BookApiConfig>(
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<BookService>();
 
-await builder.Build().RunAsync();
+var app = builder.Build();
+
+app.MapMcp();
+
+await app.RunAsync(serverUrl);

@@ -1,7 +1,8 @@
 namespace BookApiMcpServer.Services;
+
 using BookApiMcpServer.Models;
-using System.Net.Http.Json;
 using Microsoft.Extensions.Options;
+using System.Net.Http.Json;
 
 public class BookService
 {

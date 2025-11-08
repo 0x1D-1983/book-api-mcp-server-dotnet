@@ -1,8 +1,9 @@
 namespace BookApiMcpServer.Tools;
-using ModelContextProtocol.Server;
-using System.ComponentModel;
+
 using BookApiMcpServer.Services;
 using BookApiMcpServer.Models;
+using ModelContextProtocol.Server;
+using System.ComponentModel;
 using System.Text.Json;
 
 [McpServerToolType]
