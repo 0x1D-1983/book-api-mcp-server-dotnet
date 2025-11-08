@@ -24,5 +24,7 @@ COPY --from=build /app/out ./
 # Optionally set environment variables
 ENV BookApi__BaseUrl=${BOOK_API_URL}
 
+EXPOSE 5289
+
 # Set the entrypoint to run the server on container startup
 ENTRYPOINT ["dotnet", "BookApiMcpServer.dll"]

@@ -1,11 +1,10 @@
-﻿using ModelContextProtocol.Server;
-using System.ComponentModel;
+﻿using Microsoft.AspNetCore.Http;
+using ModelContextProtocol.Server;
 using BookApiMcpServer.Services;
 using BookApiMcpServer.Models;
+using ModelContextProtocol.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
-
-var serverUrl = "http://localhost:5288/";
 
 builder.Logging.AddConsole(options =>
 {
@@ -13,7 +12,6 @@ builder.Logging.AddConsole(options =>
     options.LogToStandardErrorThreshold = LogLevel.Trace;
 });
 
-builder.Services.AddHttpContextAccessor();
 builder.Services
         .AddMcpServer()
         .WithHttpTransport()
@@ -28,6 +26,7 @@ builder.Services.AddSingleton<BookService>();
 
 var app = builder.Build();
 
-app.MapMcp();
+app.MapMcp("/{toolCategory?}");
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
-await app.RunAsync(serverUrl);
+await app.RunAsync("http://0.0.0.0:5289");
