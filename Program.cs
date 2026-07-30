@@ -14,6 +14,7 @@ builder.Logging.AddConsole(options =>
 
 builder.Services
         .AddMcpServer()
+        // .AddAuthorizationFilters()
         .WithHttpTransport()
         .WithToolsFromAssembly();
 
@@ -26,7 +27,8 @@ builder.Services.AddSingleton<BookService>();
 
 var app = builder.Build();
 
-app.MapMcp("/{toolCategory?}");
+// app.MapMcp().RequireAuthorization();
+app.MapMcp();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 
 await app.RunAsync("http://0.0.0.0:5289");

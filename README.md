@@ -80,6 +80,25 @@ To use this MCP server with Cursor, add the following to your `~/.cursor/mcp.jso
 
 After adding the configuration, restart Cursor to enable the MCP server.
 
+## Usage with Claude Desktop
+
+To use it with Claude Desktop, add the following to your 'claude_desktop_config.json':
+
+```json
+"mcpServers": {
+    "book-api-mcp-server-dotnet": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "http://localhost:5289",
+        "--transport", "http-only"
+      ]
+    }
+  }
+```
+
+
+
 ## Available MCP Tools
 
 The server exposes the following tools (automatically converted to snake_case):
