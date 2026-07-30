@@ -1,5 +1,5 @@
 # Use the official .NET SDK image to build the app
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
 WORKDIR /app
 
@@ -13,8 +13,8 @@ COPY . ./
 # Build the application in release mode
 RUN dotnet publish ./BookApiMcpServer.csproj -c Release -o out
 
-# Build runtime image
-FROM mcr.microsoft.com/dotnet/runtime:9.0
+# Build runtime image (aspnet required for Microsoft.NET.Sdk.Web / AspNetCore)
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
 
 WORKDIR /app
 
