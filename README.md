@@ -82,7 +82,7 @@ After adding the configuration, restart Cursor to enable the MCP server.
 
 ## Usage with Claude Desktop
 
-To use it with Claude Desktop, add the following to your 'claude_desktop_config.json':
+To use it with Claude Desktop in remote http mode, add the following to your 'claude_desktop_config.json':
 
 ```json
 "mcpServers": {
@@ -97,7 +97,21 @@ To use it with Claude Desktop, add the following to your 'claude_desktop_config.
   }
 ```
 
+Stdio is the same setting as in Cursor
 
+Note: needs Node
+```bash
+brew install nvm
+
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.6/install.sh | bash
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+nvm install node
+nvm install-latest-npm
+```
 
 ## Available MCP Tools
 
