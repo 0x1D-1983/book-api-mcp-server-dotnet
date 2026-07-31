@@ -1,35 +1,61 @@
 ---
-description: C#/.NET service conventions
+description: BookApi MCP Server C#/.NET coding conventions
 alwaysApply: true
 ---
 
 # Stack
-- .NET (latest LTS), C#, nullable enabled, implicit usings.
-- Messaging: Kafka via Confluent.Kafka. Producers/consumers live in
-  Infrastructure/Messaging. Always use idempotent producer config.
-- Storage: TimescaleDB (Postgres) via Npgsql/Dapper — no EF Core migrations
-  unless a project already uses EF. Hypertables for time-series tables.
-- Deploy target: Kubernetes (see /k8s manifests), observability via
-  Prometheus/Grafana — expose /metrics on every service.
+- .NET 10 (`net10.0`), C#, nullable enabled, implicit usings; `Microsoft.NET.Sdk.Web`.
+- **MCP host** via `ModelContextProtocol` + `ModelContextProtocol.AspNetCore` (v2).
+- Transport: Streamable HTTP — `AddMcpServer().WithHttpTransport().WithToolsFromAssembly()`, `app.MapMcp()` at **root** (`POST /`).
+- Listens on `http://0.0.0.0:5289` (`RunAsync`).
+- Downstream BookApi via `HttpClient` + `IOptionsMonitor<BookApiConfig>` (`BookApi:BaseUrl`).
+- Console logging to **stderr** (`LogToStandardErrorThreshold = Trace`); no `Console.WriteLine` in tools/services.
+- Auth (`ConfigureMcpSecurity` / JWT) exists but stays **off** unless explicitly enabled — default is open `MapMcp()`.
 
 # Project layout
-- Each service: <ServiceName>/{Api,Application,Domain,Infrastructure}
-  + <ServiceName>.Tests (xUnit).
-- Shared libs under /libs.
+```
+BookApiMcpServer/
+├── Tools/           # BookTools, HealthTools ([McpServerToolType])
+├── Services/        # BookService, ServiceCollectionExtensions
+├── Models/          # Book, BookApiConfig
+├── Program.cs
+├── appsettings.json
+└── scripts/         # test-mcp-server.sh verification
+```
+- Namespaces: `BookApiMcpServer.Tools`, `.Services`, `.Models`.
+- Keep this flat structure; do not invent Api/Application/Domain/Infrastructure layers unless asked.
+- Do not rewrite BookApi here — call it over HTTP (`/books`, `/health`).
 
-# Testing & verification loop (do this after every change)
-1. `dotnet build` — must be warning-free before proceeding.
-2. `dotnet test` — all unit tests must pass.
-3. `docker compose -f docker-compose.yml up -d --build`
-4. Poll health endpoints (`/healthz`) and Kafka/Timescale readiness
-   before declaring success — don't just check container "Up" status.
-5. `docker compose logs --tail=200 <service>` — check for exceptions,
-   not just exit code 0.
-6. If anything fails, read the actual error, fix the root cause
-   (not just silence the symptom), and repeat from step 1.
-7. `docker compose down` when the loop finishes successfully.
+# MCP tools style
+- Static tool classes with `[McpServerToolType]`; methods with `[McpServerTool, Description("...")]`.
+- Tool names are snake_case from method names (`GetBooks` → `get_books`).
+- Inject `BookService` as a method parameter (DI); keep tools thin — HTTP lives in `BookService`.
+- Return serialized JSON **strings** (or `List<string>` for lists) via `JsonSerializer.Serialize`; missing/empty → `""`.
+- On update failure after API call, throw `InvalidOperationException` with a clear message (see `UpdateBook`).
+- Async all the way; no `.Result` / `.Wait()`.
+- Models: simple POCOs, PascalCase props, strings default to `string.Empty`.
 
-# Style
-- Use minimal APIs unless the existing project uses controllers.
-- Async all the way down; no `.Result`/`.Wait()`.
-- Structured logging (Serilog), no Console.WriteLine in service code.
+# BookService style
+- Construct with `HttpClient` + `IOptionsMonitor<BookApiConfig>`; store as `httpClient` / `config` (no underscore prefix — match existing).
+- Call BookApi root routes: `{BaseUrl}/books`, `{BaseUrl}/books/{id}` — **not** `/api/...`.
+- Use `GetAsync` / `PostAsJsonAsync` / `PutAsJsonAsync` / `DeleteAsync` + `ReadFromJsonAsync`.
+- Non-success GETs/POSTs return `null` (or empty list); `GetBooks` uses `EnsureSuccessStatusCode`.
+- After `204 NoContent` on PUT, re-fetch with `GetBookById`; DELETE success with no body returns `null`.
+
+# HTTP health
+- Minimal endpoint beside MCP: `GET /health` → `Results.Ok(new { status = "ok" })`.
+- Also expose MCP tool `get_health` → `"Healthy"`.
+
+# Testing & verification
+1. `dotnet build` — must be warning-free (fix NU190x / vulnerable packages).
+2. Compose (sibling bundle; MCP needs API + DB):  
+   `docker compose -f /Users/oxid/code/book-api-mcp-docker-compose-bundle/docker-compose.yml up -d --build timescaledb bookapi bookapi-mcp-server`
+3. Verify with curl/MCP script: `./scripts/test-mcp-server.sh` (Streamable HTTP `tools/list` + CRUD tool calls).
+4. On failure: `docker compose ... logs --tail=200 bookapi-mcp-server` (and `bookapi` if needed) — fix root cause, re-run from build.
+5. `docker compose ... down` when the loop succeeds.
+Do not declare success on container “Up” alone.
+
+# Style extras
+- Prefer clear, local changes matching existing Tools/Services patterns.
+- No drive-by refactors, unused layers, or unrelated docs.
+- New tools: add a method on an existing `[McpServerToolType]` class (or new static tool class); discovery is via `WithToolsFromAssembly()`.
