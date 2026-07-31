@@ -1,0 +1,35 @@
+---
+description: C#/.NET service conventions
+alwaysApply: true
+---
+
+# Stack
+- .NET (latest LTS), C#, nullable enabled, implicit usings.
+- Messaging: Kafka via Confluent.Kafka. Producers/consumers live in
+  Infrastructure/Messaging. Always use idempotent producer config.
+- Storage: TimescaleDB (Postgres) via Npgsql/Dapper — no EF Core migrations
+  unless a project already uses EF. Hypertables for time-series tables.
+- Deploy target: Kubernetes (see /k8s manifests), observability via
+  Prometheus/Grafana — expose /metrics on every service.
+
+# Project layout
+- Each service: <ServiceName>/{Api,Application,Domain,Infrastructure}
+  + <ServiceName>.Tests (xUnit).
+- Shared libs under /libs.
+
+# Testing & verification loop (do this after every change)
+1. `dotnet build` — must be warning-free before proceeding.
+2. `dotnet test` — all unit tests must pass.
+3. `docker compose -f docker-compose.yml up -d --build`
+4. Poll health endpoints (`/healthz`) and Kafka/Timescale readiness
+   before declaring success — don't just check container "Up" status.
+5. `docker compose logs --tail=200 <service>` — check for exceptions,
+   not just exit code 0.
+6. If anything fails, read the actual error, fix the root cause
+   (not just silence the symptom), and repeat from step 1.
+7. `docker compose down` when the loop finishes successfully.
+
+# Style
+- Use minimal APIs unless the existing project uses controllers.
+- Async all the way down; no `.Result`/`.Wait()`.
+- Structured logging (Serilog), no Console.WriteLine in service code.
